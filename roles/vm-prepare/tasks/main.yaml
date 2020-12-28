@@ -7,6 +7,11 @@
     - install_dir
     - rhcos-install
 
+- name: install a python3 package
+  yum:
+    name: pythoen3
+    state: present
+
 - name: copy a kickstart file
   copy:
     src: "{{ item }}"
@@ -26,7 +31,7 @@
     dest: "{{ ocp_work_dir }}"
 
 - name: run to temporary httpd server
-  command: "nohup {{ ocp_work_dir }}/httpd.py"
+  command: "nohup python3 {{ ocp_work_dir }}/httpd.py"
 
 - block:
   - name: RHCOS metal image download
@@ -41,7 +46,7 @@
   - name: RHCOS metal image download from {{ rhn_rhcos_url }}
     get_url:
       url: "{{ rhn_rhcos_url }}/{{ rhn_rhcos_major }}/{{ rhn_rhcos_minor }}/{{ rhn_rhcos_image }}"
-      dest: "{{ ocp_work_dir }}"
+      dest: "{{ ocp_work_dir }}/rhcos-install/rhcos-metal.x86_64.raw.gz"
 
   - name: RHCOS installer kernel donwload from {{ rhn_rhcos_url }}
     get_url:
@@ -66,7 +71,7 @@
     tags: build-rhcos
     get_url:
       url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ item }}
-      dest: "{{ ocp_work_dir }}"
+      dest: "{{ item }}"
     with_items:
       - "{{ ocp_version }}/openshift-client-linux.tar.gz"
       - "{{ ocp_version }}/openshift-install-linux.tar.gz"
@@ -92,22 +97,3 @@
 
 - name: openshift ignition manifests
   command: "{{ ocp_work_dir }}/openshift-install create manifests --dir={{ ocp_work_dir }}/install_dir"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

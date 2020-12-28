@@ -20,12 +20,12 @@
 - name: install a dns
   hosts: dns
   roles:
-    - { role: bind, tags: [ 'dns' ] }
+    - { role: core-bind, tags: [ 'dns' ] }
 
 - name: install a haproxy
   hosts: haproxy 
   roles:
-    - { role: haproxy, tags: [ 'haproxy' ] }
+    - { role: core-haproxy, tags: [ 'haproxy' ] }
 
 - name: install and configure tftp and dhcpd
   hosts: tftpd,dhcpd

@@ -38,14 +38,11 @@ rhn_rhel_image: yes
 
 ocp_vir_net: ocp133
 ocp_ignition_url: 192.168.133.1
-ocp_vir_netr: 192.168.133.
 
 ocp_public_keyfile: .ssh/id_rsa.pub
 
 web_port: 8080
 web_root: /var/www/w3
-
-localhost_ip: 127.0.0.1
 
 rhcos_image_able: yes
 client_installer_able: yes

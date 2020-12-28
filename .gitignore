@@ -1,3 +1,6 @@
+rhcos-installer-kernel-x86_64
+rhcos-metal.x86_64.raw.gz
+upi_install.log
 *.qcow2.gz
 *.tar.gz
 *.raw.gz
@@ -9,6 +12,3 @@ lab
 ocp-upi-libvirt
 pull_secret
 *.swp
-*.ks
-roles/ocp-prepare/files/rhcos-metal.x86_64.raw.gz
-upi_install.log
