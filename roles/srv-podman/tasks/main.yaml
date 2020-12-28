@@ -1,0 +1,15 @@
+- name: install podman
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - podman
+    - httpd-tools
+    - epel-release
+    - jq
+
+- name: start end enabled io.podman service
+  service:
+    name: io.podman
+    state: started
+    enabled: yes

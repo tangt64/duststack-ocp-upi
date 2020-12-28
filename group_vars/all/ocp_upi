@@ -1,0 +1,51 @@
+ocp_work_dir: /opt/ocp_dir
+ocp_version: 4.5.14
+ocp_architecture: x86_64
+ocp_base_domain: example.com
+ocp_cluster_name: ocp
+
+rhel_mirror_url: http://mirror.kakao.com/centos/7/os/x86_64/
+libvirt_disk_size: 50G
+libvirtd_nested: false
+
+utility_nodes_memory: 4096
+utility_nodes_cpu: 1
+
+internal_registry_id: redhat
+internal_registry_pw: redhat
+
+rhcos_bootstrap_node_cpu: 4
+rhcos_bootstrap_node_memory: 8192
+rhcos_master_node_cpu: 4
+rhcos_master_node_memory: 8192
+
+rhcos_worker_node_cpu: 4
+rhcos_worker_node_memory: 8192
+
+rhcos_nameserver: 192.168.133.2
+rhcos_interface_name: ens3
+
+rhn_user: ''
+rhn_pass: ''
+rhn_rhel_image_name: rhel-server-7.9-x86_64-kvm.qcow2
+rhn_rhcos_url: 'https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos'
+rhn_rhcos_major: 4.5
+rhn_rhcos_minor: 4.5.6
+rhn_rhcos_image: rhcos-metal.x86_64.raw.gz
+rhn_rhcos_kernel: rhcos-installer-kernel-x86_64
+rhn_rhcos_initramfs: rhcos-installer-initramfs.x86_64.img
+rhn_rhel_image: yes
+
+ocp_vir_net: ocp133
+ocp_ignition_url: 192.168.133.1
+ocp_vir_netr: 192.168.133.
+
+ocp_public_keyfile: .ssh/id_rsa.pub
+
+web_port: 8080
+web_root: /var/www/w3
+
+localhost_ip: 127.0.0.1
+
+rhcos_image_able: yes
+client_installer_able: yes

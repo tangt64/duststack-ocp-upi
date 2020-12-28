@@ -1,0 +1,57 @@
+- name: install python ssl package
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - python2-cryptography
+    - pyOpenSSL
+
+- name: create a directories for the registry
+  file:
+    path: /opt/registry/{{ item }}
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+  loop:
+    - auth
+    - certs
+    - data
+
+- name: generate private
+  openssl_privatekey:
+    path: /opt/registry/certs/ocp.example.com.key
+
+- name: generate certificate signing request
+  openssl_csr:
+    path: /opt/registry/certs/ocp.example.com.csr
+    privatekey_path: /opt/registry/certs/ocp.example.com.key
+    common_name: ocp.example.com
+    subject_alt_name: DNS:ocp.example.com
+    basic_constraints:
+      - CA:TRUE
+    basic_constraints_critical: True
+    backup: True
+
+- name: generate self-signed certificate for common name
+  openssl_certificate:
+    provider: selfsigned
+    path: /opt/registry/certs/ocp.example.com.crt
+    privatekey_path: /opt/registry/certs/ocp.example.com.key
+    csr_path: /opt/registry/certs/ocp.example.com.csr
+    backup: true
+
+- name: self-signed certificate to the anchors directory
+  copy: 
+    src: /opt/registry/certs/ocp.example.com.crt
+    dest: /etc/pki/ca-trust/source/anchors/example.com.crt
+    remote_src: true
+  register: new_certificate
+
+- name: add the self signed certificate to the list of trusted certificates
+  command: update-ca-trust
+  when: new_certificate is changed
+  become: true
+
+
+

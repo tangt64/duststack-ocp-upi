@@ -1,0 +1,5 @@
+- name: create a utility virtual disk
+  shell: qemu-img create -f qcow2 /var/lib/libvirt/images/{{ ocp_cluster_name }}-utility.qcow2 {{ libvirt_disk_size }}
+
+- name: provisioning utility VM
+  shell: virt-install --name {{ ocp_cluster_name }}-utility -r {{ utility_nodes_memory }} --vcpus {{ utility_nodes_cpu }} -l {{ rhel_mirror_url }} --network network={{ ocp_vir_net }} --graphics spice -v --disk=path=/var/lib/libvirt/images/{{ ocp_cluster_name }}-utility.qcow2,format=qcow2 --noautoconsole -x ks="http://{{ ocp_ignition_url }}:8080/utility.ks"

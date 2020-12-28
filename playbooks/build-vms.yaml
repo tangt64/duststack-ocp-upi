@@ -1,0 +1,69 @@
+- name: build VMs haproxy and utility
+  hosts: vms
+  roles:
+    - { role: vm-prepare, tags: [ 'vm-prepare' ] }
+    - { role: vm-haproxy, tags: [ 'vm-haproxy'] }
+    - { role: vm-utility, tags: [ 'vm-utility'] }
+    - { role: vm-custom, tags: [ 'vm-custom'] }
+
+- name: start VMs haproxy and utility
+  hosts: vms
+  roles:
+    - { role: vm-start, tags: [ 'vm-start' ] }
+
+- name: prepare ocp installer
+  hosts: vms
+  roles:
+
+    - { role: ocp-prepare-config, tags: ['ocp-prepare-config' ]}
+
+- name: install a dns
+  hosts: dns
+  roles:
+    - { role: bind, tags: [ 'dns' ] }
+
+- name: install a haproxy
+  hosts: haproxy 
+  roles:
+    - { role: haproxy, tags: [ 'haproxy' ] }
+
+- name: install and configure tftp and dhcpd
+  hosts: tftpd,dhcpd
+  roles:
+    - { role: srv-tftpd, tags: [ 'tftpd' ] }
+    - { role: srv-dhcpd, tags: [ 'dhcpd' ] }
+
+- name: install the podman and docker registry server
+  hosts: registry
+  roles:
+    - { role: srv-podman, tags: [ 'podman' ] }
+    - { role: srv-imagemirror, tags: [ 'imagemirror' ] }
+
+- name: deploy bootstrap MV
+  hosts: vms
+  roles: 
+    - { role: deploy-bootstrap, tags: [ 'bootstrap' ] }
+
+# Baremetal
+#
+## ---------------------------------------------------------- ##
+#
+# Virtual Install
+
+- name: deploy master node 1/2/3
+  hosts: vms
+  roles: 
+    - { role: deploy-master, tags: [ 'master' ], when: virtual | bool }
+
+- name: deploy workder node 1/2
+  hosts: vms
+  roles: 
+    - { role: deploy-node, tags: [ 'node' ], when: virtual | bool }
+
+- name: post setup
+  hosts: utility
+  roles:
+    - { role: post-setup, tags: [ 'postsetup' ], when: virtual | bool }
+  environment:
+    KUBECONFIG: /root/kubeconfig
+    PATH: '{{ ansible_env.PATH }}:/root/'

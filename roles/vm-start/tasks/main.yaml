@@ -1,0 +1,7 @@
+- name: start to the utility and haproxy server
+  virt:
+    name: "{{ item }}"
+    state: running
+  loop:
+    - "{{ ocp_cluster_name }}-utility"
+    - "{{ ocp_cluster_name }}-haproxy"

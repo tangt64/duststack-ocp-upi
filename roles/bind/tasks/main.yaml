@@ -1,0 +1,46 @@
+- name: set firewalld
+  firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+  loop:
+    - dns
+
+- name: install bind package
+  yum:
+    name: bind
+    state: latest
+    
+- name: copy 133.168.192.in and example.com.zone
+  copy:
+    src: "{{ item }}"
+    dest: /var/named/{{ item }}
+  loop:
+    - ocp.example.com.zone
+    - 133.168.192.in-addr.arpa.zone
+ 
+- name: rfc1912.zones
+  copy:
+    src: named.conf
+    dest: /etc/named.conf
+
+- name: copy named.ocp.zone.conf
+  copy:
+    src: named.ocp.zone.conf
+    dest: /etc/named.ocp.zone.conf
+
+- name: set permission a zone files
+  file:
+    mode: 0644
+    path: /var/named/{{ item }}
+    group: named
+    owner: root
+  loop:
+    - "ocp.example.com.zone"
+    - "133.168.192.in-addr.arpa.zone"
+
+- name: set service 
+  service:
+    name: named
+    state: started
+    enabled: yes

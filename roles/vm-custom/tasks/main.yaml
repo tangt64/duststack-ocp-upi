@@ -1,0 +1,9 @@
+- name: wait for build a VM
+  pause:
+    minutes: 10
+
+- name: inject ssh pub key
+  shell: virt-customize -m {{ utility_nodes_memory }} -a /var/lib/libvirt/images/{{ ocp_cluster_name }}-{{ item }}.qcow2 --uninstall cloud-init --ssh-inject root:file:{{ ansible_env.HOME }}/{{ ocp_public_keyfile }} --selinux-relabel
+  loop:
+    - haproxy
+    - utility

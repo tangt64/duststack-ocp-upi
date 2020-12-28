@@ -1,0 +1,113 @@
+- name: mkdir a install_dir 
+  file:
+    path: "{{ ocp_work_dir }}/{{ item }}"
+    state: directory
+    recurse: yes
+  loop:
+    - install_dir
+    - rhcos-install
+
+- name: copy a kickstart file
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ocp_work_dir }}"
+  loop:
+    - haproxy.ks
+    - utility.ks
+
+- name: RHCOS treeinfo template
+  template:
+    src: treeinfo.j2
+    dest: "{{ ocp_work_dir }}/rhcos-install"
+
+- name: temporary httpd server
+  template:
+    src: httpd.py.j2
+    dest: "{{ ocp_work_dir }}"
+
+- name: run to temporary httpd server
+  command: "nohup {{ ocp_work_dir }}/httpd.py"
+
+- block:
+  - name: RHCOS metal image download
+    copy:
+      src: "{{ item.srcimg }}"
+      dest: "{{ ocp_work_dir }}/rhcos-install/{{ item.destimg }}"
+    loop:
+      - { srcimg: rhcos-installer-kernel-x86_64, destimg: 'vmlinuz' }
+      - { srcimg: rhcos-installer-initramfs.x86_64.img, destimg: 'initramfs.img'}
+      - { srcimg: rhcos-metal.x86_64.raw.gz, destimg: 'rhcos-metal.x86_64.raw.gz'}
+  rescue:
+  - name: RHCOS metal image download from {{ rhn_rhcos_url }}
+    get_url:
+      url: "{{ rhn_rhcos_url }}/{{ rhn_rhcos_major }}/{{ rhn_rhcos_minor }}/{{ rhn_rhcos_image }}"
+      dest: "{{ ocp_work_dir }}"
+
+  - name: RHCOS installer kernel donwload from {{ rhn_rhcos_url }}
+    get_url:
+      url: "{{ rhn_rhcos_url }}/{{ rhn_rhcos_major }}/{{ rhn_rhcos_minor }}/{{ rhn_rhcos_kernel }}"
+      dest: "{{ ocp_work_dir }}/rhcos-install/vmlinuz"
+
+  - name: RHCOS installer initramfs donwload from {{ rhn_rhcos_url }}
+    get_url:
+      url: "{{ rhn_rhcos_url }}/{{ rhn_rhcos_major }}/{{ rhn_rhcos_minor }}/{{ rhn_rhcos_initramfs }}"
+      dest: "{{ ocp_work_dir }}/rhcos-install/initramfs.img"
+
+- block:
+  - name: OCP client and installer copy
+    copy:
+      src: "{{ item }}"
+      dest: "{{ ocp_work_dir }}"
+    loop:
+      - openshift-client-linux.tar.gz
+      - openshift-install-linux.tar.gz
+  rescue:
+  - name: download openshift v4 client and installer from online
+    tags: build-rhcos
+    get_url:
+      url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ item }}
+      dest: "{{ ocp_work_dir }}"
+    with_items:
+      - "{{ ocp_version }}/openshift-client-linux.tar.gz"
+      - "{{ ocp_version }}/openshift-install-linux.tar.gz"
+
+
+- name: unarchive openshift client and installer
+  unarchive:
+    src: "{{ ocp_work_dir }}/{{ item }}"
+    dest: "{{ ocp_work_dir }}"
+  loop:
+    - openshift-client-linux.tar.gz
+    - openshift-install-linux.tar.gz
+
+- name: SSH public key read
+  slurp:
+    src: "{{ ansible_env.HOME }}/.ssh/id_rsa.pub"
+  register: ocp_public_key
+
+- name: Generate to the OCP install-config.yaml
+  template:
+    src: install-config.yaml.j2
+    dest: "{{ ocp_work_dir }}/install_dir/install-config.yaml"
+
+- name: openshift ignition manifests
+  command: "{{ ocp_work_dir }}/openshift-install create manifests --dir={{ ocp_work_dir }}/install_dir"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

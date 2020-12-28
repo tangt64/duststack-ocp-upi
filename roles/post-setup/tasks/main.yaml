@@ -1,0 +1,27 @@
+- name: copy oc 
+  copy:
+    src: '{{ ocp_work_dir }}/oc'
+    dest: /root/oc
+    mode: 744
+
+- name: copy kubeconfig
+  copy:
+    src: '{{ ocp_work_dir }}/install_dir/auth/kubeconfig'
+    dest: /root/kubeconfig
+
+- name: approve all the csr and wait a minutes the worker and infra nodes can be seen.
+  shell: "oc get csr -o name | xargs oc adm certificate approve"
+
+- pause:
+    minutes: 5
+    prompt: wait a approve all the crs about 5 mins
+
+- name: label to nodes as infra node for ingress service
+  shell: "oc label node {{ item }} node-role.kubernetes.io/infra=true --overwrite"
+  loop:
+    - node1.ocp.example.com
+    - node2.ocp.example.com
+
+- name: RWX storage no has the cluster
+  shell: oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+

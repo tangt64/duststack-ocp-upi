@@ -1,0 +1,36 @@
+- name: install haproxy
+  yum:
+    name: haproxy
+    state: latest
+
+- name: get haproxy.cfg file from gateway
+  copy:
+    src: haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+
+#- name: set selinux port
+#  seport:
+#    ports: "{{ item }}"
+#    proto: tcp
+#    setype: http_port_t
+#    state: present
+#  loop:
+#    - 6443
+#    - 22623
+
+- name: set firewalld port
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+  loop:
+    - 6443/tcp
+    - 22623/tcp
+    - 9000/tcp
+
+- name: start and enable haproxy
+  service:
+    name: haproxy
+    state: started
+    enabled: yes
+

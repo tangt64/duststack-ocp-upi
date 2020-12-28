@@ -1,0 +1,7 @@
+- name: openshift ignition config
+  command: "{{ ocp_work_dir }}/openshift-install create ignition-configs --dir={{ ocp_work_dir }}/install_dir"
+
+- name: create pull_secret as a file
+  copy:
+    content: "{{ pull_sec }}"
+    dest: "{{ ocp_work_dir }}/ocp4_pull_secret"
